@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LO Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:           #f4f1ec;
+  --bg2:          #ede9e2;
+  --surface:      #faf8f5;
+  --surface2:     #f0ece5;
+  --border:       #d8d2c8;
+  --border2:      #c4bdb2;
+  --ink:          #1c1a17;
+  --ink2:         #3d3a35;
+  --muted:        #7a746b;
+  --faint:        #a09890;
+  --accent:       #b8832a;
+  --accent2:      #c49a40;
+  --danger:       #c0392b;
+  --safe:         #2e7d5e;
+  --warn-bg:      #fdf3e3;
+  --warn-border:  #e8c97a;
+  --flag-bg:      #fdf1ef;
+  --flag-border:  #e8a99a;
+  --blue:         #2c5f8a;
+  --blue-light:   #e8f0f8;
+  --blue-border:  #aac4dc;
+  --green-light:  #edf5f1;
+  --green-border: #8ec4aa;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Lato', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(140,130,118,.04) 28px, rgba(140,130,118,.04) 29px);
+  pointer-events: none; z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════ */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1.5px solid var(--border2);
+  background: var(--surface);
+  box-shadow: 0 1px 8px rgba(0,0,0,.06);
+}
+.header-inner {
+  max-width: 1040px; margin: 0 auto;
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 40px;
+}
+.logo-mark { flex-shrink: 0; width: 38px; height: 38px; cursor: pointer; }
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 500; color: var(--ink);
+  cursor: pointer; letter-spacing: -.2px;
+}
+.header-title span { color: var(--accent); }
+.nav-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  margin-left: auto;
+  font-size: 12px; color: var(--faint);
+}
+.nav-breadcrumb .crumb-home {
+  cursor: pointer; color: var(--accent);
+  text-decoration: none; font-weight: 700;
+  letter-spacing: .3px;
+}
+.nav-breadcrumb .crumb-home:hover { text-decoration: underline; }
+.nav-breadcrumb .sep { color: var(--border2); }
+.nav-breadcrumb .crumb-current { color: var(--muted); }
+@media(max-width:600px){ .header-inner { padding: 14px 18px; } }
+
+/* ═══════════════════════════════════════════════════════
+   PAGES
+═══════════════════════════════════════════════════════ */
+.page { display: none; position: relative; z-index: 1; }
+.page.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════════ */
+.dashboard {
+  max-width: 1040px; margin: 0 auto;
+  padding: 56px 40px 100px;
+}
+@media(max-width:600px){ .dashboard { padding: 32px 18px 80px; } }
+.dash-hero { margin-bottom: 48px; }
+.dash-hero-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+}
+.dash-hero h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px; font-weight: 400; color: var(--ink);
+  line-height: 1.25; max-width: 520px;
+}
+.dash-hero p {
+  margin-top: 12px; color: var(--muted); font-size: 15px;
+  max-width: 480px; font-weight: 300;
+}
+.dash-rule {
+  height: 2px; width: 60px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  margin: 16px 0 0;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+@media(max-width:700px){ .tools-grid { grid-template-columns: 1fr; } }
+
+.tool-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 32px;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s, transform .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  position: relative;
+  overflow: hidden;
+}
+.tool-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0; transition: opacity .2s;
+}
+.tool-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+.tool-card:hover::before { opacity: 1; }
+.tool-card.coming-soon { cursor: default; opacity: .68; }
+.tool-card.coming-soon:hover { border-color: var(--border); transform: none; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.tool-card.coming-soon:hover::before { opacity: 0; }
+
+.tc-icon {
+  width: 44px; height: 44px; margin-bottom: 20px;
+}
+.tc-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; padding: 2px 8px;
+  border-radius: 2px; margin-bottom: 10px;
+}
+.tc-tag.live    { background: var(--green-light); color: var(--safe); border: 1px solid var(--green-border); }
+.tc-tag.soon    { background: var(--bg2); color: var(--faint); border: 1px solid var(--border); }
+.tc-tag.new     { background: var(--warn-bg); color: var(--accent); border: 1px solid var(--warn-border); }
+
+.tc-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; font-weight: 500; color: var(--ink);
+  margin-bottom: 8px; line-height: 1.3;
+}
+.tc-desc { font-size: 13px; color: var(--muted); line-height: 1.6; font-weight: 300; }
+.tc-arrow {
+  position: absolute; bottom: 28px; right: 28px;
+  color: var(--accent); font-size: 18px; opacity: 0;
+  transition: opacity .2s, transform .2s;
+}
+.tool-card:hover .tc-arrow { opacity: 1; transform: translateX(3px); }
+
+/* ═══════════════════════════════════════════════════════
+   TOOL PAGES — shared shell
+═══════════════════════════════════════════════════════ */
+.tool-page {
+  max-width: 960px; margin: 0 auto;
+  padding: 44px 40px 100px;
+}
+@media(max-width:600px){ .tool-page { padding: 28px 18px 80px; } }
+
+.step-label { display: flex; align-items: center; gap: 11px; margin-bottom: 20px; }
+.step-num {
+  width: 24px; height: 24px;
+  border: 1.5px solid var(--accent); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inconsolata', monospace; font-size: 12px;
+  font-weight: 600; color: var(--accent); flex-shrink: 0;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 500; color: var(--ink);
+}
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border); border-radius: 4px;
+  padding: 30px 32px; margin-bottom: 28px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 18px rgba(0,0,0,.04);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px 28px; }
+@media(max-width:600px){ .form-grid,.form-grid-3 { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 6px; }
+label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--muted);
+}
+input, select {
+  background: var(--bg); border: 1.5px solid var(--border); border-radius: 3px;
+  color: var(--ink); font-family: 'Lato', sans-serif; font-size: 14px;
+  padding: 10px 14px; transition: border-color .15s, box-shadow .15s;
+  outline: none; width: 100%; -webkit-appearance: none; appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a09890'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+}
+input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(184,131,42,.12);
+}
+input::placeholder { color: var(--faint); }
+.field-hint { font-size: 11px; color: var(--faint); margin-top: 2px; }
+
+.btn {
+  border: none; border-radius: 3px; cursor: pointer;
+  font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: .6px; text-transform: uppercase;
+  padding: 11px 22px; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(184,131,42,.28); }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-remove {
+  background: transparent; color: var(--faint);
+  border: 1px solid var(--border); font-size: 11px;
+  padding: 5px 10px; letter-spacing: 0; text-transform: none; font-weight: 400;
+}
+.btn-remove:hover { border-color: var(--danger); color: var(--danger); background: var(--flag-bg); }
+.btn-copy { background: var(--ink); color: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+.btn-copy:hover { background: var(--ink2); transform: translateY(-1px); }
+.btn-outline { background: transparent; color: var(--muted); border: 1.5px solid var(--border2); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.mono { font-family: 'Inconsolata', monospace; }
+.badge {
+  display: inline-block; font-family: 'Inconsolata', monospace;
+  font-size: 10.5px; font-weight: 600; letter-spacing: .5px;
+  padding: 2px 7px; border-radius: 2px; border: 1px solid; margin-bottom: 2px;
+}
+.badge-flag  { background: var(--flag-bg);  border-color: var(--flag-border); color: var(--danger); }
+.badge-warn  { background: var(--warn-bg);  border-color: var(--warn-border); color: #8a6810; }
+.badge-ok    { background: var(--green-light); border-color: var(--green-border); color: var(--safe); }
+
+.paper-trail-text { font-size: 12px; color: var(--muted); line-height: 1.5; max-width: 280px; }
+.empty-state {
+  text-align: center; padding: 38px 20px;
+  color: var(--faint); font-size: 13px;
+  border: 1.5px dashed var(--border2); border-radius: 3px; margin-top: 16px;
+}
+.summary-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+@media(max-width:480px){ .summary-bar { grid-template-columns: 1fr; } }
+.stat-box {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 4px; padding: 16px 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.stat-label { font-size: 10.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--ink); line-height: 1; }
+.stat-value.flagged { color: var(--danger); }
+.stat-value.warned  { color: var(--accent); }
+.prog-note {
+  display: none; margin-top: 18px; padding: 14px 18px;
+  background: var(--warn-bg); border-left: 3px solid var(--accent);
+  border-radius: 0 3px 3px 0; font-size: 13px; color: var(--ink2); line-height: 1.6;
+}
+.prog-note.visible { display: block; }
+.prog-note-label { font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.threshold-pill { display: none; margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+.threshold-pill .val {
+  font-family: 'Inconsolata', monospace; font-weight: 600; color: var(--ink2);
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: 2px; padding: 1px 7px;
+}
+.email-area {
+  background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 3px;
+  font-family: 'Inconsolata', monospace; font-size: 13px; line-height: 1.75;
+  color: var(--ink2); padding: 22px 24px;
+  white-space: pre-wrap; max-height: 520px; overflow-y: auto;
+  margin-bottom: 16px; letter-spacing: .2px;
+}
+.email-area::-webkit-scrollbar { width: 6px; }
+.email-area::-webkit-scrollbar-track { background: var(--bg2); }
+.email-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.copy-row { display: flex; align-items: center; gap: 14px; }
+.copy-confirm { font-size: 12px; color: var(--safe); font-weight: 700; letter-spacing: .4px; opacity: 0; transition: opacity .3s; }
+.copy-confirm.show { opacity: 1; }
+.card-header { display: flex; align-items: center; margin-bottom: 22px; }
+.reset-btn {
+  font-size: 12px; color: var(--faint); cursor: pointer;
+  background: none; border: none; font-family: 'Lato', sans-serif;
+  padding: 0; margin-left: auto; transition: color .15s;
+}
+.reset-btn:hover { color: var(--danger); }
+.disclaimer {
+  font-size: 11px; color: var(--faint);
+  text-align: center; margin-top: 40px; line-height: 1.7;
+}
+.disclaimer strong { color: var(--muted); }
+.add-row {
+  display: grid; grid-template-columns: 160px 220px 1fr auto;
+  gap: 16px; align-items: end; margin-top: 4px;
+}
+@media(max-width:680px){ .add-row { grid-template-columns: 1fr 1fr; } }
+.table-wrap { margin-top: 20px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead tr { border-bottom: 2px solid var(--border2); }
+th {
+  text-align: left; font-size: 10.5px; font-weight: 700;
+  letter-spacing: .9px; text-transform: uppercase;
+  color: var(--faint); padding: 6px 10px 10px;
+}
+td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg2); }
+
+/* ═══════════════════════════════════════════════════════
+   BUYDOWN TOOL — comparison columns
+═══════════════════════════════════════════════════════ */
+.compare-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px; margin-top: 8px;
+}
+@media(max-width:720px){ .compare-grid { grid-template-columns: 1fr; } }
+
+.compare-col {
+  border: 1.5px solid var(--border); border-radius: 4px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  transition: box-shadow .2s;
+}
+.compare-col.winner {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(184,131,42,.15), 0 4px 16px rgba(0,0,0,.08);
+}
+.col-header {
+  padding: 16px 20px 14px;
+  border-bottom: 1.5px solid var(--border);
+}
+.col-header.pmi-header    { background: #f5eaea; }
+.col-header.seller-header { background: var(--blue-light); }
+.col-header.perm-header   { background: var(--green-light); }
+
+.col-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; margin-bottom: 6px; display: block;
+}
+.pmi-tag    { color: var(--danger); }
+.seller-tag { color: var(--blue); }
+.perm-tag   { color: var(--safe); }
+
+.col-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 500; color: var(--ink);
+}
+.winner-badge {
+  display: inline-block; margin-top: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: .6px;
+  background: var(--warn-bg); border: 1px solid var(--warn-border);
+  color: var(--accent); padding: 2px 8px; border-radius: 2px;
+}
+
+.col-body { padding: 20px; }
+.col-metric { margin-bottom: 18px; }
+.col-metric:last-child { margin-bottom: 0; }
+.col-metric-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 4px;
+}
+.col-metric-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: var(--ink); line-height: 1;
+}
+.col-metric-value.highlight { color: var(--safe); }
+.col-metric-value.bad { color: var(--danger); }
+.col-metric-sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.col-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+.results-hidden { display: none; }
+
+.info-note {
+  background: var(--warn-bg); border-left: 3px solid var(--accent);
+  border-radius: 0 3px 3px 0; padding: 12px 16px;
+  font-size: 12.5px; color: var(--ink2); line-height: 1.6; margin-top: 16px;
+}
+.info-note strong { color: var(--accent); }
+
+.override-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 10px;
+}
+.override-row label { text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 400; color: var(--muted); }
+.override-row input[type="checkbox"] { width: auto; padding: 0; }
+.override-row .override-field { display: flex; align-items: center; gap: 8px; }
+
+.section-divider {
+  border: none; border-top: 1.5px solid var(--border);
+  margin: 28px 0 24px;
+}
+.section-sub-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .9px;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 16px;
+}
+
+/* PMI estimate display */
+.pmi-estimate-box {
+  display: none;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 3px; padding: 10px 14px;
+  font-size: 12.5px; color: var(--ink2); margin-top: 8px;
+}
+.pmi-estimate-box.show { display: block; }
+.pmi-estimate-box .est-val {
+  font-family: 'Inconsolata', monospace; font-weight: 600; color: var(--accent);
+}
+
+/* Page transition */
+.page { animation: pageFade .25s ease; }
+@keyframes pageFade { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+    <svg class="logo-mark" onclick="showPage('dashboard')" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="6" y="10" width="22" height="27" rx="2" fill="#e8e2d8" stroke="#c4bdb2" stroke-width="1.5"/>
+      <rect x="10" y="6" width="22" height="27" rx="2" fill="#faf8f5" stroke="#c4bdb2" stroke-width="1.5"/>
+      <line x1="15" y1="14" x2="27" y2="14" stroke="#b8832a" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="15" y1="18" x2="27" y2="18" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="15" y1="22" x2="22" y2="22" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="15" y1="26" x2="25" y2="26" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="32" cy="30" r="7" fill="#b8832a"/>
+      <line x1="29" y1="30" x2="35" y2="30" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+      <line x1="32" y1="27" x2="32" y2="33" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <div class="header-title" onclick="showPage('dashboard')">LO <span>Toolkit</span></div>
+    <div class="nav-breadcrumb" id="breadcrumb" style="display:none">
+      <a class="crumb-home" onclick="showPage('dashboard')">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb-current" id="breadcrumb-label"></span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE: DASHBOARD
+═══════════════════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="dashboard">
+    <div class="dash-hero">
+      <div class="dash-hero-label">Loan Officer Toolkit</div>
+      <h2>Professional tools for modern mortgage origination.</h2>
+      <p>Analysis, documentation guidance, and comparison tools — built for loan officers, not spreadsheets.</p>
+      <div class="dash-rule"></div>
+    </div>
+
+    <div class="tools-grid">
+
+      <!-- Tool 1: Large Deposit -->
+      <div class="tool-card" onclick="showPage('deposits')">
+        <svg class="tc-icon" viewBox="0 0 44 44" fill="none">
+          <rect x="4" y="8" width="24" height="30" rx="2" fill="#ede9e2" stroke="#c4bdb2" stroke-width="1.5"/>
+          <rect x="8" y="4" width="24" height="30" rx="2" fill="#faf8f5" stroke="#c4bdb2" stroke-width="1.5"/>
+          <line x1="13" y1="13" x2="27" y2="13" stroke="#b8832a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="18" x2="27" y2="18" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="23" x2="21" y2="23" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="34" cy="34" r="8" fill="#c0392b"/>
+          <line x1="34" y1="30" x2="34" y2="38" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="30" y1="34" x2="38" y2="34" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div><span class="tc-tag live">Live</span></div>
+        <div class="tc-title">Large Deposit Analyzer</div>
+        <div class="tc-desc">Enter deposits, get instant flagging against the 50% threshold, paper trail requirements, and a copy-ready email summary — by program.</div>
+        <div class="tc-arrow">→</div>
+      </div>
+
+      <!-- Tool 2: PMI vs Buydown -->
+      <div class="tool-card" onclick="showPage('buydown')">
+        <svg class="tc-icon" viewBox="0 0 44 44" fill="none">
+          <rect x="3" y="28" width="10" height="13" rx="1.5" fill="#e8f0f8" stroke="#aac4dc" stroke-width="1.5"/>
+          <rect x="17" y="18" width="10" height="23" rx="1.5" fill="#edf5f1" stroke="#8ec4aa" stroke-width="1.5"/>
+          <rect x="31" y="10" width="10" height="31" rx="1.5" fill="#fdf3e3" stroke="#e8c97a" stroke-width="1.5"/>
+          <polyline points="8,27 22,17 36,9" stroke="#b8832a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="8" cy="27" r="2.5" fill="#b8832a"/>
+          <circle cx="22" cy="17" r="2.5" fill="#b8832a"/>
+          <circle cx="36" cy="9" r="2.5" fill="#b8832a"/>
+        </svg>
+        <div><span class="tc-tag new">New</span></div>
+        <div class="tc-title">PMI vs. Buydown Comparison</div>
+        <div class="tc-desc">Compare PMI, seller-paid temporary buydown, and permanent rate buydown side by side — monthly payment, break-even, and total cost over loan life.</div>
+        <div class="tc-arrow">→</div>
+      </div>
+
+      <!-- Tool 3: DTI Repair (coming soon) -->
+      <div class="tool-card coming-soon">
+        <svg class="tc-icon" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="16" fill="#ede9e2" stroke="#c4bdb2" stroke-width="1.5"/>
+          <path d="M14 22 Q14 14 22 14 Q30 14 30 22" stroke="#b8832a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <rect x="10" y="22" width="24" height="8" rx="1.5" fill="#faf8f5" stroke="#c4bdb2" stroke-width="1.5"/>
+          <line x1="14" y1="26" x2="20" y2="26" stroke="#b8832a" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="23" y1="26" x2="30" y2="26" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div><span class="tc-tag soon">Coming Soon</span></div>
+        <div class="tc-title">DTI Ratio Repair Tool</div>
+        <div class="tc-desc">Program-specific DTI thresholds, payoff strategies, and scenario modeling for Conventional, FHA, VA, and USDA loans.</div>
+      </div>
+
+      <!-- Tool 4: Loan Needs List (coming soon) -->
+      <div class="tool-card coming-soon">
+        <svg class="tc-icon" viewBox="0 0 44 44" fill="none">
+          <rect x="6" y="6" width="32" height="32" rx="3" fill="#ede9e2" stroke="#c4bdb2" stroke-width="1.5"/>
+          <line x1="12" y1="15" x2="32" y2="15" stroke="#b8832a" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="12" cy="22" r="2" fill="#c4bdb2"/>
+          <line x1="16" y1="22" x2="32" y2="22" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="12" cy="29" r="2" fill="#c4bdb2"/>
+          <line x1="16" y1="29" x2="26" y2="29" stroke="#d8d2c8" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div><span class="tc-tag soon">Coming Soon</span></div>
+        <div class="tc-title">Loan Needs List Builder</div>
+        <div class="tc-desc">Generate complete, program-specific document checklists with borrower-ready email output and processor summaries.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE: LARGE DEPOSIT ANALYZER
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-deposits">
+  <div class="tool-page">
+
+    <div class="card">
+      <div class="step-label"><div class="step-num">1</div><div class="step-title">Loan Setup</div></div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Loan Program</label>
+          <select id="d-programSelect" onchange="d_onProgramChange()">
+            <option value="">— Select program —</option>
+            <option value="CONV_FANNIE">Conventional (Fannie Mae)</option>
+            <option value="CONV_FREDDIE">Conventional (Freddie Mac)</option>
+            <option value="FHA">FHA</option>
+            <option value="VA">VA</option>
+            <option value="USDA">USDA</option>
+            <option value="JUMBO">Jumbo</option>
+            <option value="NONQM_BANKSTATEMENT">Non-QM Bank Statement</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Qualifying Monthly Income ($)</label>
+          <input type="number" id="d-incomeInput" placeholder="e.g. 7,500" min="0" oninput="d_updateThreshold()" onchange="d_updateThreshold()">
+        </div>
+      </div>
+      <div id="d-thresholdPill" class="threshold-pill">
+        Large deposit threshold: <span class="val" id="d-thresholdVal">—</span>&nbsp;·&nbsp;50% of qualifying income
+      </div>
+      <div id="d-progNote" class="prog-note">
+        <div class="prog-note-label">Program Guidance</div>
+        <span id="d-progNoteText"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="step-label"><div class="step-num">2</div><div class="step-title">Add Deposits</div></div>
+      <div class="add-row">
+        <div class="field">
+          <label>Amount ($)</label>
+          <input type="number" id="d-depAmount" placeholder="0.00" min="0" step="0.01" onkeydown="if(event.key==='Enter') d_addDeposit()">
+        </div>
+        <div class="field">
+          <label>Deposit Type</label>
+          <select id="d-depType">
+            <option value="">— Select type —</option>
+            <option value="PAYROLL">Payroll / Recurring Income</option>
+            <option value="CASH">Cash Deposit</option>
+            <option value="GIFT">Gift Funds</option>
+            <option value="TRANSFER">Transfer Between Accounts</option>
+            <option value="P2P">Zelle / Venmo / P2P</option>
+            <option value="SALE_ASSET">Sale of Asset</option>
+            <option value="TAX_REFUND">Tax Refund</option>
+            <option value="INSURANCE">Insurance Proceeds</option>
+            <option value="RETIREMENT">Retirement Distribution</option>
+            <option value="BONUS">Bonus or Commission</option>
+            <option value="LOAN_PROCEEDS">Loan Proceeds</option>
+            <option value="EMD">Earnest Money Deposit (EMD)</option>
+            <option value="OTHER">Other / Unknown</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Statement Reference (optional)</label>
+          <input type="text" id="d-depMemo" placeholder="e.g. Statement pg. 3, 06/10 — no borrower names">
+        </div>
+        <div class="field">
+          <button class="btn btn-primary" onclick="d_addDeposit()">+ Add</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div id="d-emptyState" class="empty-state">No deposits added yet — use the fields above to begin.</div>
+        <table id="d-depositTable" style="display:none">
+          <thead>
+            <tr><th>#</th><th>Amount</th><th>Type</th><th>Status</th><th>Statement Ref</th><th>Minimum Paper Trail</th><th></th></tr>
+          </thead>
+          <tbody id="d-depositBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="d-summarySection" style="display:none">
+      <div class="summary-bar">
+        <div class="stat-box"><div class="stat-label">Total Deposited</div><div class="stat-value" id="d-statTotal">—</div></div>
+        <div class="stat-box"><div class="stat-label">Large Deposits</div><div class="stat-value flagged" id="d-statFlagged">—</div></div>
+        <div class="stat-box"><div class="stat-label">Always-Document</div><div class="stat-value warned" id="d-statAlways">—</div></div>
+      </div>
+    </div>
+
+    <div class="card" id="d-emailCard" style="display:none">
+      <div class="card-header">
+        <div class="step-label" style="margin-bottom:0">
+          <div class="step-num">3</div><div class="step-title">Email-Ready Output</div>
+        </div>
+        <button class="reset-btn" onclick="d_resetAll()">Reset all</button>
+      </div>
+      <div class="email-area" id="d-emailOutput"></div>
+      <div class="copy-row">
+        <button class="btn btn-copy" onclick="d_copyEmail()">Copy to Clipboard</button>
+        <span id="d-copyConfirm" class="copy-confirm">&#10003; Copied</span>
+      </div>
+    </div>
+
+    <p class="disclaimer">
+      <strong>For internal loan officer use only.</strong><br>
+      Do not enter borrower names, SSNs, or any personally identifiable information.<br>
+      This tool does not store or transmit data of any kind.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE: PMI vs BUYDOWN
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page-buydown">
+  <div class="tool-page">
+
+    <!-- Inputs -->
+    <div class="card">
+      <div class="step-label"><div class="step-num">1</div><div class="step-title">Loan Details</div></div>
+      <div class="form-grid-3">
+        <div class="field">
+          <label>Home Purchase Price ($)</label>
+          <input type="number" id="b-price" placeholder="e.g. 450,000" min="0" oninput="b_calc()">
+        </div>
+        <div class="field">
+          <label>Down Payment ($)</label>
+          <input type="number" id="b-down" placeholder="e.g. 22,500" min="0" oninput="b_calc()">
+          <div class="field-hint" id="b-ltv-hint"></div>
+        </div>
+        <div class="field">
+          <label>Base Interest Rate (%)</label>
+          <input type="number" id="b-rate" placeholder="e.g. 7.25" min="0" max="20" step="0.01" oninput="b_calc()">
+        </div>
+        <div class="field">
+          <label>Loan Term</label>
+          <select id="b-term" onchange="b_calc()">
+            <option value="30">30-Year Fixed</option>
+            <option value="20">20-Year Fixed</option>
+            <option value="15">15-Year Fixed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Credit Score Tier</label>
+          <select id="b-credit" onchange="b_estimatePMI()">
+            <option value="760">760+ (Excellent)</option>
+            <option value="740">740–759 (Very Good)</option>
+            <option value="720">720–739 (Good)</option>
+            <option value="700">700–719 (Fair-Good)</option>
+            <option value="680">680–699 (Fair)</option>
+            <option value="660">660–679 (Below Avg)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Loan Program</label>
+          <select id="b-program" onchange="b_calc()">
+            <option value="conv">Conventional</option>
+            <option value="fha">FHA</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-sub-title">PMI / MIP Rate</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Estimated PMI Rate (% of loan/yr)</label>
+          <input type="number" id="b-pmi" placeholder="Auto-estimated" min="0" max="5" step="0.01" oninput="b_calc()">
+          <div id="b-pmi-estimate" class="pmi-estimate-box"></div>
+        </div>
+        <div style="display:flex; flex-direction:column; justify-content:flex-end;">
+          <button class="btn btn-outline" onclick="b_estimatePMI()" style="width:fit-content">&#8635; Re-estimate PMI</button>
+        </div>
+      </div>
+      <div class="info-note" style="margin-top:16px">
+        <strong>PMI estimate</strong> is based on LTV and credit score — a useful starting point. Your actual rate will vary by lender and MI provider. Override by typing directly in the field above.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="step-label"><div class="step-num">2</div><div class="step-title">Buydown Scenarios</div></div>
+
+      <div class="section-sub-title">Seller-Paid Temporary Buydown (2-1 Buydown)</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Year 1 Rate (%)</label>
+          <input type="number" id="b-sb-yr1" placeholder="e.g. 5.25" min="0" step="0.01" oninput="b_calc()">
+          <div class="field-hint">Typically base rate − 2%</div>
+        </div>
+        <div class="field">
+          <label>Year 2 Rate (%)</label>
+          <input type="number" id="b-sb-yr2" placeholder="e.g. 6.25" min="0" step="0.01" oninput="b_calc()">
+          <div class="field-hint">Typically base rate − 1%</div>
+        </div>
+        <div class="field">
+          <label>Seller Credit / Buydown Cost ($)</label>
+          <input type="number" id="b-sb-cost" placeholder="e.g. 8,500" min="0" oninput="b_calc()">
+          <div class="field-hint">Upfront cost paid by seller</div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-sub-title">Permanent Rate Buydown (Points)</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Bought-Down Rate (%)</label>
+          <input type="number" id="b-pb-rate" placeholder="e.g. 6.875" min="0" step="0.01" oninput="b_calc()">
+          <div class="field-hint">Rate after buying points</div>
+        </div>
+        <div class="field">
+          <label>Points Cost ($)</label>
+          <input type="number" id="b-pb-cost" placeholder="e.g. 6,750" min="0" oninput="b_calc()">
+          <div class="field-hint">Upfront cost to borrower</div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-sub-title">Analysis Horizon</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>How long will borrower keep this loan? (years)</label>
+          <select id="b-horizon" onchange="b_calc()">
+            <option value="3">3 years</option>
+            <option value="5" selected>5 years</option>
+            <option value="7">7 years</option>
+            <option value="10">10 years</option>
+            <option value="30">Full loan term</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Expected PMI removal (months from close)</label>
+          <input type="number" id="b-pmi-remove" placeholder="e.g. 48" min="0" oninput="b_calc()">
+          <div class="field-hint">Conventional: typically when LTV reaches 80%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="b-results" class="results-hidden">
+      <div class="card">
+        <div class="card-header" style="margin-bottom:20px">
+          <div class="step-label" style="margin-bottom:0">
+            <div class="step-num">3</div><div class="step-title">Side-by-Side Comparison</div>
+          </div>
+          <button class="reset-btn" onclick="b_reset()">Reset</button>
+        </div>
+        <div class="compare-grid">
+          <!-- PMI Column -->
+          <div class="compare-col" id="b-col-pmi">
+            <div class="col-header pmi-header">
+              <span class="col-tag pmi-tag">Option A</span>
+              <div class="col-name">Keep PMI</div>
+              <div id="b-pmi-winner" class="winner-badge" style="display:none">★ Lowest Upfront</div>
+            </div>
+            <div class="col-body">
+              <div class="col-metric">
+                <div class="col-metric-label">Monthly P&amp;I + PMI</div>
+                <div class="col-metric-value" id="b-pmi-monthly">—</div>
+                <div class="col-metric-sub" id="b-pmi-monthly-sub"></div>
+              </div>
+              <hr class="col-divider">
+              <div class="col-metric">
+                <div class="col-metric-label">Upfront Cost</div>
+                <div class="col-metric-value" id="b-pmi-upfront">$0</div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Total PMI Paid</div>
+                <div class="col-metric-value" id="b-pmi-total-pmi">—</div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Total Cost over Horizon</div>
+                <div class="col-metric-value" id="b-pmi-total">—</div>
+              </div>
+              <hr class="col-divider">
+              <div class="col-metric">
+                <div class="col-metric-label">Break-even vs. Perm Buydown</div>
+                <div class="col-metric-value" id="b-pmi-be">—</div>
+                <div class="col-metric-sub" id="b-pmi-be-sub"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seller Buydown Column -->
+          <div class="compare-col" id="b-col-seller">
+            <div class="col-header seller-header">
+              <span class="col-tag seller-tag">Option B</span>
+              <div class="col-name">Seller-Paid 2-1 Buydown</div>
+              <div id="b-seller-winner" class="winner-badge" style="display:none">★ Best Short-Term</div>
+            </div>
+            <div class="col-body">
+              <div class="col-metric">
+                <div class="col-metric-label">Yr 1 Monthly Payment</div>
+                <div class="col-metric-value" id="b-sel-yr1">—</div>
+                <div class="col-metric-sub" id="b-sel-yr1-sub"></div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Yr 2 Monthly Payment</div>
+                <div class="col-metric-value" id="b-sel-yr2">—</div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Yr 3+ Monthly Payment</div>
+                <div class="col-metric-value" id="b-sel-yr3">—</div>
+                <div class="col-metric-sub">Returns to base rate</div>
+              </div>
+              <hr class="col-divider">
+              <div class="col-metric">
+                <div class="col-metric-label">Seller Credit Required</div>
+                <div class="col-metric-value" id="b-sel-cost">—</div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Total Cost over Horizon</div>
+                <div class="col-metric-value" id="b-sel-total">—</div>
+              </div>
+              <hr class="col-divider">
+              <div class="col-metric">
+                <div class="col-metric-label">Savings vs. PMI (Horizon)</div>
+                <div class="col-metric-value" id="b-sel-save">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Permanent Buydown Column -->
+          <div class="compare-col" id="b-col-perm">
+            <div class="col-header perm-header">
+              <span class="col-tag perm-tag">Option C</span>
+              <div class="col-name">Permanent Rate Buydown</div>
+              <div id="b-perm-winner" class="winner-badge" style="display:none">★ Best Long-Term</div>
+            </div>
+            <div class="col-body">
+              <div class="col-metric">
+                <div class="col-metric-label">New Monthly P&amp;I</div>
+                <div class="col-metric-value" id="b-perm-monthly">—</div>
+                <div class="col-metric-sub" id="b-perm-monthly-sub"></div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Monthly Savings vs. PMI</div>
+                <div class="col-metric-value highlight" id="b-perm-mo-save">—</div>
+              </div>
+              <hr class="col-divider">
+              <div class="col-metric">
+                <div class="col-metric-label">Upfront Points Cost</div>
+                <div class="col-metric-value" id="b-perm-cost">—</div>
+              </div>
+              <div class="col-metric">
+                <div class="col-metric-label">Total Cost over Horizon</div>
+                <div class="col-metric-value" id="b-perm-total">—</div>
+              </div>
+              <hr class="col-divider">
+              <div class="col-metric">
+                <div class="col-metric-label">Break-even vs. PMI</div>
+                <div class="col-metric-value" id="b-perm-be">—</div>
+                <div class="col-metric-sub" id="b-perm-be-sub"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="b-recommendation" class="info-note" style="margin-top:24px; display:none"></div>
+      </div>
+
+      <p class="disclaimer">
+        <strong>For discussion purposes only.</strong> All calculations are estimates based on inputs provided.<br>
+        Do not enter borrower names or personally identifiable information.<br>
+        Actual rates, PMI costs, and lender fees will vary. Always verify with your lender and MI provider.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════ -->
+<script>
+// ────────────────────────────────────────────────────────
+// ROUTING
+// ────────────────────────────────────────────────────────
+const PAGE_LABELS = {
+  dashboard: null,
+  deposits:  'Large Deposit Analyzer',
+  buydown:   'PMI vs. Buydown Comparison',
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const bc = document.getElementById('breadcrumb');
+  if (id === 'dashboard') {
+    bc.style.display = 'none';
+  } else {
+    bc.style.display = 'flex';
+    document.getElementById('breadcrumb-label').textContent = PAGE_LABELS[id];
+  }
+  window.scrollTo(0, 0);
+}
+
+// ────────────────────────────────────────────────────────
+// SHARED HELPERS
+// ────────────────────────────────────────────────────────
+const fmt$ = n => isNaN(n) ? '$—' : '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtN = n => isNaN(n) ? '—' : Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const pmt  = (r, n, pv) => { if (r === 0) return pv/n; return pv * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1); };
+
+// ────────────────────────────────────────────────────────
+// DEPOSIT ANALYZER DATA
+// ────────────────────────────────────────────────────────
+const D_PROGRAMS = {
+  CONV_FANNIE:         { label:'Conventional (Fannie Mae)',  note:'Standard Fannie Mae guidelines apply. Gift funds require a gift letter and evidence of transfer. Donor ability documentation may be required by lender overlay.' },
+  CONV_FREDDIE:        { label:'Conventional (Freddie Mac)', note:'Freddie Mac may permit Asset Derived Income — confirm eligibility with AUS findings. Standard large deposit documentation rules apply.' },
+  FHA:                 { label:'FHA',                        note:'FHA requires a full explanation and paper trail for all large deposits. Gift funds require a signed gift letter, evidence of transfer, and donor ability documentation per FHA Handbook and applicable lender overlays.' },
+  VA:                  { label:'VA',                         note:'VA requires explanation for large or unusual deposits. Cash deposits are generally not acceptable. Confirm with lender guidelines and VA Pamphlet 26-7.' },
+  USDA:                { label:'USDA',                       note:'USDA follows standard agency large deposit documentation requirements. Gift fund donor ability requirements vary by investor overlay.' },
+  JUMBO:               { label:'Jumbo',                      note:'Jumbo guidelines vary significantly by investor. Full documentation is typically required for all large or unusual deposits. Confirm requirements with your specific investor prior to submission.' },
+  NONQM_BANKSTATEMENT: { label:'Non-QM Bank Statement',      note:'Bank statement programs assess cash flow holistically — large deposits may inflate qualifying income calculations. Document and disclose all large deposits; confirm treatment with your Non-QM lender before submission.' },
+};
+const D_TYPES = {
+  PAYROLL:       { label:'Payroll / Recurring Income',  alwaysDoc:false, paperTrail:'If used for qualifying, ensure standard income docs are in file (paystubs, award letters, etc.).', note:'Consistent, identifiable payroll deposits are generally not treated as a large deposit issue.' },
+  CASH:          { label:'Cash Deposit',                alwaysDoc:true,  paperTrail:'Written explanation from borrower identifying the source. Proof of cash origin if acceptable. Cash deposits are frequently excluded by underwriters.', note:'High-risk type. Expect UW scrutiny; plan to exclude funds if source cannot be fully documented.' },
+  GIFT:          { label:'Gift Funds',                  alwaysDoc:true,  paperTrail:'Signed gift letter. Evidence of transfer. Donor ability documentation may be required depending on program and lender overlay.', note:'Review program-specific guidance for donor ability requirements before submitting.' },
+  TRANSFER:      { label:'Transfer Between Accounts',   alwaysDoc:true,  paperTrail:'Statements for both accounts showing withdrawal and corresponding deposit, with matching amounts and dates.', note:'Label as same-source transfer. Confirm the source account is included in the asset documentation.' },
+  P2P:           { label:'Zelle / Venmo / P2P',         alwaysDoc:true,  paperTrail:'Identify sender and stated reason. Show transaction history if recurring. Source documentation if funds are for qualifying.', note:'Treat as cash equivalent if the sender or purpose is unclear to underwriting.' },
+  SALE_ASSET:    { label:'Sale of Asset',               alwaysDoc:true,  paperTrail:'Bill of sale and proof of prior ownership. Evidence of funds received (check copy, deposit slip).', note:'Include title transfer documentation for vehicles or high-value items if applicable.' },
+  TAX_REFUND:    { label:'Tax Refund',                  alwaysDoc:false, paperTrail:'Tax transcript or return showing expected refund amount, and evidence of receipt/deposit.', note:'Clearly identified IRS or state refunds are generally straightforward to document.' },
+  INSURANCE:     { label:'Insurance Proceeds',          alwaysDoc:true,  paperTrail:'Borrower explanation letter. Insurance settlement or claim documentation confirming amount and purpose.', note:'Confirm funds are not intended to replace a damaged or lost asset that was part of the qualifying asset picture.' },
+  RETIREMENT:    { label:'Retirement Distribution',     alwaysDoc:true,  paperTrail:'Distribution or withdrawal statement. Evidence of deposit. Confirm whether funds are a loan or a true distribution — repayment terms must be disclosed.', note:'Undisclosed retirement loans must be reflected in liabilities on the 1003.' },
+  BONUS:         { label:'Bonus or Commission',         alwaysDoc:false, paperTrail:'Paystub or employer letter confirming the bonus or commission. Match to income documentation already in file.', note:'If used for qualifying income, document as stable and predictable per program guidelines.' },
+  LOAN_PROCEEDS: { label:'Loan Proceeds',               alwaysDoc:true,  paperTrail:'Loan documents confirming proceeds and repayment terms. Liability must be disclosed on the application (1003).', note:'Undisclosed debt is a serious underwriting red flag. Ensure liability is reflected in DTI.' },
+  EMD:           { label:'Earnest Money Deposit (EMD)', alwaysDoc:false, paperTrail:'Cancelled check or wire confirmation. Purchase agreement showing EMD amount and payee.', note:'Confirm EMD does not exceed FHA limits (1% of sales price) if applicable. Verify source is an acceptable asset.' },
+  OTHER:         { label:'Other / Unknown',             alwaysDoc:true,  paperTrail:'Borrower explanation letter identifying the source. Supporting documentation for the claimed source.', note:'Unknown deposits are high risk. Obtain full documentation before submitting to underwriting.' },
+};
+
+let d_deposits = [], d_counter = 0;
+
+function d_getThreshold() { const i = parseFloat(document.getElementById('d-incomeInput').value); return (i && i > 0) ? i * 0.5 : null; }
+function d_isLarge(amt)   { const t = d_getThreshold(); return t !== null && amt >= t; }
+
+function d_onProgramChange() {
+  const key = document.getElementById('d-programSelect').value;
+  const el  = document.getElementById('d-progNote');
+  if (key && D_PROGRAMS[key]) {
+    document.getElementById('d-progNoteText').textContent = D_PROGRAMS[key].note;
+    el.classList.add('visible');
+  } else { el.classList.remove('visible'); }
+  d_updateThreshold(); d_renderAll();
+}
+
+function d_updateThreshold() {
+  const t = d_getThreshold();
+  const el = document.getElementById('d-thresholdPill');
+  if (t) { document.getElementById('d-thresholdVal').textContent = fmt$(t); el.style.display = 'block'; }
+  else   { el.style.display = 'none'; }
+  d_renderAll();
+}
+
+function d_addDeposit() {
+  const amt = parseFloat(document.getElementById('d-depAmount').value);
+  const key = document.getElementById('d-depType').value;
+  const memo = document.getElementById('d-depMemo').value.trim();
+  if (!amt || amt <= 0) { d_flash('d-depAmount'); return; }
+  if (!key)             { d_flash('d-depType');   return; }
+  d_counter++;
+  d_deposits.push({ id: d_counter, amt, key, memo });
+  document.getElementById('d-depAmount').value = '';
+  document.getElementById('d-depType').value   = '';
+  document.getElementById('d-depMemo').value   = '';
+  document.getElementById('d-depAmount').focus();
+  d_renderAll();
+}
+
+function d_flash(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = 'var(--danger)'; el.focus();
+  setTimeout(() => { el.style.borderColor = ''; }, 1200);
+}
+
+function d_removeDeposit(id) { d_deposits = d_deposits.filter(d => d.id !== id); d_renderAll(); }
+
+function d_renderAll() { d_renderTable(); d_renderSummary(); d_renderEmail(); }
+
+function d_renderTable() {
+  const tbody = document.getElementById('d-depositBody');
+  const table = document.getElementById('d-depositTable');
+  const empty = document.getElementById('d-emptyState');
+  tbody.innerHTML = '';
+  if (!d_deposits.length) { table.style.display='none'; empty.style.display='block'; return; }
+  table.style.display='table'; empty.style.display='none';
+  d_deposits.forEach((d,i) => {
+    const dt = D_TYPES[d.key]; const large = d_isLarge(d.amt);
+    const badges = [];
+    if (large)        badges.push(`<span class="badge badge-flag">LARGE DEPOSIT</span>`);
+    if (dt.alwaysDoc) badges.push(`<span class="badge badge-warn">DOCUMENT ALWAYS</span>`);
+    if (!large && !dt.alwaysDoc) badges.push(`<span class="badge badge-ok">STANDARD</span>`);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="mono" style="color:var(--faint);font-size:12px">${i+1}</td>
+      <td class="mono" style="font-size:14px;font-weight:600">${fmt$(d.amt)}</td>
+      <td style="font-size:13px">${dt.label}</td>
+      <td>${badges.join('<br>')}</td>
+      <td style="color:var(--muted);font-size:12px">${d.memo||'—'}</td>
+      <td class="paper-trail-text">${dt.paperTrail}</td>
+      <td><button class="btn btn-remove" onclick="d_removeDeposit(${d.id})">Remove</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function d_renderSummary() {
+  const sec  = document.getElementById('d-summarySection');
+  const card = document.getElementById('d-emailCard');
+  if (!d_deposits.length) { sec.style.display='none'; card.style.display='none'; return; }
+  sec.style.display='block'; card.style.display='block';
+  const total   = d_deposits.reduce((s,d) => s+d.amt, 0);
+  const flagged = d_deposits.filter(d => d_isLarge(d.amt)).length;
+  const always  = d_deposits.filter(d => D_TYPES[d.key].alwaysDoc).length;
+  document.getElementById('d-statTotal').textContent   = fmt$(total);
+  document.getElementById('d-statFlagged').textContent = flagged;
+  document.getElementById('d-statAlways').textContent  = always;
+}
+
+function d_renderEmail() {
+  if (!d_deposits.length) return;
+  const progKey   = document.getElementById('d-programSelect').value;
+  const prog      = progKey ? D_PROGRAMS[progKey] : null;
+  const progLabel = prog ? prog.label : '(Program not selected)';
+  const t         = d_getThreshold();
+  const today     = new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
+  const RULE      = '─'.repeat(54);
+  const lines     = [];
+  lines.push('LARGE DEPOSIT DOCUMENTATION SUMMARY');
+  lines.push(`Generated: ${today}`);
+  lines.push(`Program:   ${progLabel}`);
+  if (t) lines.push(`Threshold: ${fmt$(t)}  (50% of qualifying income)`);
+  lines.push(''); lines.push(RULE); lines.push('');
+  d_deposits.forEach((d,i) => {
+    const dt = D_TYPES[d.key]; const large = d_isLarge(d.amt);
+    lines.push(`[${i+1}]  ${fmt$(d.amt)}  —  ${dt.label}`);
+    if (d.memo) lines.push(`     Ref:   ${d.memo}`);
+    if (large)        lines.push(`     ⚠  LARGE DEPOSIT — documentation required`);
+    if (dt.alwaysDoc) lines.push(`     ⚠  DOCUMENT ALWAYS — regardless of amount`);
+    lines.push(`     Paper trail required:`);
+    lines.push(`     ${dt.paperTrail}`);
+    if (dt.note) lines.push(`     Guidance: ${dt.note}`);
+    lines.push('');
+  });
+  if (prog && prog.note) {
+    lines.push(RULE); lines.push('');
+    lines.push(`PROGRAM NOTE — ${progLabel.toUpperCase()}`);
+    lines.push(prog.note); lines.push('');
+  }
+  lines.push(RULE);
+  lines.push('For internal loan officer use only. Do not include PII in this output.');
+  document.getElementById('d-emailOutput').textContent = lines.join('\n');
+}
+
+function d_copyEmail() {
+  navigator.clipboard.writeText(document.getElementById('d-emailOutput').textContent).then(() => {
+    const c = document.getElementById('d-copyConfirm');
+    c.classList.add('show');
+    setTimeout(() => c.classList.remove('show'), 2500);
+  });
+}
+
+function d_resetAll() {
+  if (!confirm('Clear all deposits and reset the form?')) return;
+  d_deposits = []; d_counter = 0;
+  ['d-programSelect','d-incomeInput','d-depAmount','d-depType','d-depMemo'].forEach(id => { document.getElementById(id).value=''; });
+  document.getElementById('d-progNote').classList.remove('visible');
+  document.getElementById('d-thresholdPill').style.display = 'none';
+  d_renderAll();
+}
+
+// ────────────────────────────────────────────────────────
+// PMI vs BUYDOWN CALCULATOR
+// ────────────────────────────────────────────────────────
+
+// PMI estimation table: [LTV range max, credit score breakpoints → annual rate]
+// Structure: { ltvMax: { creditMin: rate } }
+const PMI_TABLE = [
+  { ltvMax: 85,  rates: { 760:0.0019, 740:0.0022, 720:0.0028, 700:0.0034, 680:0.0043, 660:0.0055 } },
+  { ltvMax: 90,  rates: { 760:0.0031, 740:0.0037, 720:0.0046, 700:0.0056, 680:0.0068, 660:0.0082 } },
+  { ltvMax: 95,  rates: { 760:0.0052, 740:0.0062, 720:0.0074, 700:0.0087, 680:0.0101, 660:0.0120 } },
+  { ltvMax: 97,  rates: { 760:0.0068, 740:0.0080, 720:0.0094, 700:0.0110, 680:0.0128, 660:0.0150 } },
+  { ltvMax: 100, rates: { 760:0.0090, 740:0.0105, 720:0.0122, 700:0.0141, 680:0.0162, 660:0.0185 } },
+];
+
+function b_getLTV() {
+  const price = parseFloat(document.getElementById('b-price').value);
+  const down  = parseFloat(document.getElementById('b-down').value);
+  if (!price || !down || price <= 0) return null;
+  return ((price - down) / price) * 100;
+}
+
+function b_estimatePMI() {
+  const ltv    = b_getLTV();
+  const credit = parseInt(document.getElementById('b-credit').value);
+  const prog   = document.getElementById('b-program').value;
+  const estBox = document.getElementById('b-pmi-estimate');
+
+  if (prog === 'fha') {
+    // FHA MIP: 0.55% annual for most 30yr loans > 90% LTV (simplified)
+    const mipRate = 0.55;
+    estBox.innerHTML = `FHA Annual MIP estimated at <span class="est-val">${mipRate.toFixed(2)}%</span> — standard for 30yr loans with &gt;10% down. Confirm with FHA MIP schedule.`;
+    estBox.classList.add('show');
+    if (!document.getElementById('b-pmi').value) document.getElementById('b-pmi').value = mipRate;
+    b_calc(); return;
+  }
+
+  if (!ltv) { estBox.classList.remove('show'); return; }
+
+  const row = PMI_TABLE.find(r => ltv <= r.ltvMax);
+  if (!row) { estBox.classList.remove('show'); return; }
+
+  // Find nearest credit tier
+  const tiers = [760,740,720,700,680,660];
+  const tier  = tiers.find(t => credit >= t) || 660;
+  const rate  = (row.rates[tier] * 100).toFixed(3);
+  estBox.innerHTML = `Estimated PMI: <span class="est-val">${rate}% / yr</span> — based on ${ltv.toFixed(1)}% LTV and ${credit}+ credit score tier. Rates vary by MI provider.`;
+  estBox.classList.add('show');
+
+  // Only auto-fill if field is empty
+  if (!document.getElementById('b-pmi').value) {
+    document.getElementById('b-pmi').value = rate;
+  }
+  b_calc();
+
+  // Update LTV hint
+  const hintEl = document.getElementById('b-ltv-hint');
+  hintEl.textContent = `LTV: ${ltv.toFixed(1)}%`;
+}
+
+function b_calc() {
+  const price   = parseFloat(document.getElementById('b-price').value);
+  const down    = parseFloat(document.getElementById('b-down').value);
+  const baseRate= parseFloat(document.getElementById('b-rate').value);
+  const termYrs = parseInt(document.getElementById('b-term').value);
+  const pmiRate = parseFloat(document.getElementById('b-pmi').value);
+
+  const sbYr1Rate  = parseFloat(document.getElementById('b-sb-yr1').value);
+  const sbYr2Rate  = parseFloat(document.getElementById('b-sb-yr2').value);
+  const sbCost     = parseFloat(document.getElementById('b-sb-cost').value) || 0;
+
+  const pbRate     = parseFloat(document.getElementById('b-pb-rate').value);
+  const pbCost     = parseFloat(document.getElementById('b-pb-cost').value) || 0;
+
+  const horizonYrs = parseInt(document.getElementById('b-horizon').value);
+  const pmiRemove  = parseInt(document.getElementById('b-pmi-remove').value) || (termYrs * 12);
+
+  // Update LTV hint
+  const ltv = b_getLTV();
+  if (ltv) document.getElementById('b-ltv-hint').textContent = `LTV: ${ltv.toFixed(1)}%`;
+
+  // Need at minimum: price, down, baseRate, pmiRate
+  if (!price || !down || !baseRate || !pmiRate) {
+    document.getElementById('b-results').classList.add('results-hidden');
+    return;
+  }
+
+  const loanAmt  = price - down;
+  const n        = termYrs * 12;
+  const horizonMo= horizonYrs * 12;
+  const monthlyR = baseRate / 100 / 12;
+
+  // ── Option A: PMI ──────────────────────────────────────
+  const piBase      = pmt(monthlyR, n, loanAmt);
+  const pmiMonthly  = loanAmt * (pmiRate / 100) / 12;
+  const totalA_mo   = piBase + pmiMonthly;
+
+  // Total cost over horizon: sum month by month, stopping PMI at removal month
+  let totalA = 0;
+  for (let m = 1; m <= horizonMo; m++) {
+    totalA += piBase + (m <= pmiRemove ? pmiMonthly : 0);
+  }
+  const totalPMIPaid = pmiMonthly * Math.min(horizonMo, pmiRemove);
+
+  // ── Option B: Seller 2-1 Buydown ──────────────────────
+  let totalB = sbCost; // upfront seller credit counts as cost to transaction
+  let selYr1Monthly = null, selYr2Monthly = null, selYr3Monthly = null;
+
+  if (!isNaN(sbYr1Rate) && !isNaN(sbYr2Rate)) {
+    const r1 = sbYr1Rate / 100 / 12;
+    const r2 = sbYr2Rate / 100 / 12;
+    selYr1Monthly = pmt(r1, n, loanAmt);
+    selYr2Monthly = pmt(r2, n, loanAmt);
+    selYr3Monthly = piBase;
+
+    totalB = 0;
+    for (let m = 1; m <= horizonMo; m++) {
+      if (m <= 12)      totalB += selYr1Monthly;
+      else if (m <= 24) totalB += selYr2Monthly;
+      else              totalB += selYr3Monthly;
+    }
+    totalB += sbCost;
+  }
+
+  // ── Option C: Permanent Buydown ────────────────────────
+  let totalC = null, permMonthly = null, permSaveMo = null, permBEMonths = null;
+  if (!isNaN(pbRate) && pbRate > 0) {
+    const rPerm = pbRate / 100 / 12;
+    permMonthly = pmt(rPerm, n, loanAmt);
+    permSaveMo  = totalA_mo - permMonthly; // monthly saving vs PMI option
+    totalC = permMonthly * horizonMo + pbCost;
+    // break-even vs PMI: months until cumulative savings = upfront cost
+    const monthlySavingVsPMI = totalA_mo - permMonthly;
+    permBEMonths = monthlySavingVsPMI > 0 ? Math.ceil(pbCost / monthlySavingVsPMI) : null;
+  }
+
+  // ── Render ─────────────────────────────────────────────
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  // PMI col
+  set('b-pmi-monthly',    fmt$(totalA_mo));
+  set('b-pmi-monthly-sub', `P&I ${fmt$(piBase)} + PMI ${fmt$(pmiMonthly)}/mo`);
+  set('b-pmi-upfront',    '$0');
+  set('b-pmi-total-pmi',  fmt$(totalPMIPaid));
+  set('b-pmi-total',      fmt$(totalA));
+  if (permBEMonths !== null) {
+    set('b-pmi-be', `${permBEMonths} months`);
+    set('b-pmi-be-sub', permBEMonths <= horizonMo ? 'Break-even within horizon ✓' : 'Break-even beyond horizon');
+  } else {
+    set('b-pmi-be', 'Enter perm buydown data');
+    set('b-pmi-be-sub', '');
+  }
+
+  // Seller col
+  if (selYr1Monthly !== null) {
+    set('b-sel-yr1',    fmt$(selYr1Monthly));
+    set('b-sel-yr1-sub', `Saves ${fmt$(totalA_mo - selYr1Monthly)}/mo vs PMI option`);
+    set('b-sel-yr2',    fmt$(selYr2Monthly));
+    set('b-sel-yr3',    fmt$(selYr3Monthly));
+    set('b-sel-cost',   fmt$(sbCost));
+    set('b-sel-total',  fmt$(totalB));
+    const selSave = totalA - totalB;
+    const el = document.getElementById('b-sel-save');
+    el.textContent = (selSave >= 0 ? '+' : '') + fmt$(selSave);
+    el.className = 'col-metric-value ' + (selSave >= 0 ? 'highlight' : 'bad');
+  } else {
+    ['b-sel-yr1','b-sel-yr2','b-sel-yr3','b-sel-cost','b-sel-total','b-sel-save'].forEach(id => set(id,'Enter buydown rates'));
+  }
+
+  // Perm col
+  if (permMonthly !== null) {
+    set('b-perm-monthly',    fmt$(permMonthly));
+    set('b-perm-monthly-sub', `Rate: ${pbRate}% vs base ${baseRate}%`);
+    const savEl = document.getElementById('b-perm-mo-save');
+    savEl.textContent = (permSaveMo >= 0 ? '+' : '') + fmt$(permSaveMo) + '/mo';
+    savEl.className = 'col-metric-value ' + (permSaveMo >= 0 ? 'highlight' : 'bad');
+    set('b-perm-cost',  fmt$(pbCost));
+    set('b-perm-total', fmt$(totalC));
+    if (permBEMonths !== null) {
+      set('b-perm-be',     `${permBEMonths} months`);
+      set('b-perm-be-sub', permBEMonths <= horizonMo ? `Recouped within ${horizonYrs}-yr horizon ✓` : `Not recouped in ${horizonYrs}-yr horizon`);
+    }
+  } else {
+    ['b-perm-monthly','b-perm-mo-save','b-perm-cost','b-perm-total','b-perm-be'].forEach(id => set(id,'Enter buydown data'));
+  }
+
+  // Winner badges
+  document.getElementById('b-pmi-winner').style.display    = 'none';
+  document.getElementById('b-seller-winner').style.display = 'none';
+  document.getElementById('b-perm-winner').style.display   = 'none';
+  ['b-col-pmi','b-col-seller','b-col-perm'].forEach(id => document.getElementById(id).classList.remove('winner'));
+
+  if (totalC !== null && !isNaN(totalB)) {
+    const costs = [
+      { id:'b-col-pmi',    total:totalA,  badge:'b-pmi-winner' },
+      { id:'b-col-seller', total:totalB,  badge:'b-seller-winner' },
+      { id:'b-col-perm',   total:totalC,  badge:'b-perm-winner' },
+    ];
+    const best = costs.reduce((a,b) => a.total < b.total ? a : b);
+    document.getElementById(best.id).classList.add('winner');
+    document.getElementById(best.badge).style.display = 'inline-block';
+
+    // Recommendation text
+    const recEl = document.getElementById('b-recommendation');
+    recEl.style.display = 'block';
+    const names = { 'b-col-pmi':'keeping PMI', 'b-col-seller':'the seller-paid 2-1 buydown', 'b-col-perm':'the permanent rate buydown' };
+    const permOk = permBEMonths !== null && permBEMonths <= horizonMo;
+    let rec = `<strong>Over your ${horizonYrs}-year horizon,</strong> ${names[best.id]} results in the lowest total cost at ${fmt$(best.total)}.`;
+    if (best.id === 'b-col-perm' && permOk) {
+      rec += ` The permanent buydown breaks even in ${permBEMonths} months — well within the horizon.`;
+    } else if (best.id === 'b-col-perm' && !permOk) {
+      rec += ` Note: the break-even point falls outside the selected horizon — if the borrower moves or refinances sooner, PMI or the seller buydown may be more advantageous.`;
+    } else if (best.id === 'b-col-seller') {
+      rec += ` The seller credit reduces early payments while the borrower builds equity. If rates drop, the borrower can refinance from the base rate with less sunk cost.`;
+    }
+    recEl.innerHTML = rec;
+  } else {
+    document.getElementById('b-recommendation').style.display = 'none';
+  }
+
+  document.getElementById('b-results').classList.remove('results-hidden');
+}
+
+function b_reset() {
+  ['b-price','b-down','b-rate','b-pmi','b-sb-yr1','b-sb-yr2','b-sb-cost','b-pb-rate','b-pb-cost','b-pmi-remove'].forEach(id => { document.getElementById(id).value=''; });
+  document.getElementById('b-pmi-estimate').classList.remove('show');
+  document.getElementById('b-ltv-hint').textContent = '';
+  document.getElementById('b-results').classList.add('results-hidden');
+}
+</script>
+</body>
+</html>
