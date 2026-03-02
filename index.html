@@ -826,50 +826,42 @@ tbody tr:hover td { background: var(--bg2); }
     <!-- STEP 1: CORE INPUTS -->
     <div class="card">
       <div class="step-label"><div class="step-num">1</div><div class="step-title">Core Inputs</div></div>
-      <div class="form-grid-3">
-        <div class="field">
-          <label>Loan Program</label>
-          <select id="dti-program" onchange="dti_calc()">
-            <option value="CONV">Conventional</option>
-            <option value="FHA">FHA</option>
-            <option value="VA">VA</option>
-            <option value="USDA">USDA</option>
-          </select>
-        </div>
+
+      <!-- Income — full width on its own row -->
+      <div style="max-width:320px;margin-bottom:24px">
         <div class="field">
           <label>Monthly Qualifying Income ($)</label>
           <input type="number" id="dti-income" placeholder="e.g. 8,500" min="0" oninput="dti_calc()">
         </div>
-        <div class="field">
-          <label>AUS / Underwrite Type</label>
-          <select id="dti-uw" onchange="dti_calc()">
-            <option value="AUS">AUS Approved</option>
-            <option value="MANUAL">Manual Underwrite</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Current Front Ratio (%)</label>
-          <input type="number" id="dti-front" placeholder="e.g. 32.5" min="0" max="100" step="0.1" oninput="dti_calc()">
-          <div class="field-hint">Housing PITI ÷ qualifying income</div>
-        </div>
-        <div class="field">
-          <label>Current Back Ratio (%)</label>
-          <input type="number" id="dti-back" placeholder="e.g. 48.2" min="0" max="100" step="0.1" oninput="dti_calc()">
-          <div class="field-hint">All monthly debts + PITI ÷ qualifying income</div>
-        </div>
-        <div class="field">
-          <label>Monthly Housing Payment ($)</label>
-          <input type="number" id="dti-piti" placeholder="e.g. 2,400" min="0" oninput="dti_calc()">
-          <div class="field-hint">Full PITI used in front ratio</div>
-        </div>
       </div>
 
-      <!-- Program threshold display -->
-      <div id="dti-threshold-bar" style="display:none;margin-top:20px">
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <div class="threshold-pill" style="display:inline-block" id="dti-front-pill">Front: — / —</div>
-          <div class="threshold-pill" style="display:inline-block" id="dti-back-pill">Back: — / —</div>
-          <div id="dti-manual-note" style="display:none;font-size:12px;color:var(--accent);padding:6px 12px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:3px">⚠ Manual UW limits apply — stricter thresholds in effect</div>
+      <!-- Current ratios (left) + Target ratios (right) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:640px">
+        <div>
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);margin-bottom:12px">Current Ratios</div>
+          <div class="field" style="margin-bottom:16px">
+            <label>Front End DTI (%)</label>
+            <input type="number" id="dti-front" placeholder="e.g. 32.5" min="0" max="100" step="0.1" oninput="dti_calc()">
+            <div class="field-hint">Housing PITI ÷ qualifying income</div>
+          </div>
+          <div class="field">
+            <label>Back End DTI (%)</label>
+            <input type="number" id="dti-back" placeholder="e.g. 48.2" min="0" max="100" step="0.1" oninput="dti_calc()">
+            <div class="field-hint">All monthly debts + PITI ÷ qualifying income</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);margin-bottom:12px">Target Ratios</div>
+          <div class="field" style="margin-bottom:16px">
+            <label>Target Front Ratio (%)</label>
+            <input type="number" id="dti-target-front" placeholder="e.g. 28" min="0" max="100" step="0.1" value="45" oninput="dti_calc()">
+            <div class="field-hint">Your program's front limit</div>
+          </div>
+          <div class="field">
+            <label>Target Back Ratio (%)</label>
+            <input type="number" id="dti-target-back" placeholder="e.g. 45" min="0" max="100" step="0.1" value="45" oninput="dti_calc()">
+            <div class="field-hint">Your program's back limit</div>
+          </div>
         </div>
       </div>
     </div>
@@ -2274,49 +2266,10 @@ function b_reset() {
 // DTI RATIO REPAIR TOOL
 // ────────────────────────────────────────────────────────
 
-// Program DTI limits: standard AUS and manual UW thresholds
-const DTI_LIMITS = {
-  CONV:  { frontAUS: 0.28, backAUS: 0.45, frontManual: 0.28, backManual: 0.36, label: 'Conventional' },
-  FHA:   { frontAUS: 0.31, backAUS: 0.43, frontManual: 0.31, backManual: 0.43, label: 'FHA' },
-  VA:    { frontAUS: null, backAUS: 0.41, frontManual: null, backManual: 0.41, label: 'VA' },
-  USDA:  { frontAUS: 0.29, backAUS: 0.41, frontManual: 0.29, backManual: 0.41, label: 'USDA' },
-};
-
-const DTI_INCOME_STRATEGIES = [
-  { title: 'Add a Co-Borrower', body: 'Co-borrower income adds to the qualifying total. Net their monthly debts against the income benefit first before adding.' },
-  { title: 'Non-Taxable Income Gross-Up', body: 'VA disability, SSI, child support — Conv/VA/USDA gross up 25%, FHA 15–25%. Multiply non-taxable monthly income by the applicable factor.' },
-  { title: 'Rental Income — 2–4 Unit Subject', body: '75% of market rent from non-owner-occupied units offsets PITI. Requires signed leases or appraisal Form 1007 / 1025.' },
-  { title: 'Asset Depletion (Conv / Non-QM)', body: 'Eligible assets minus down payment and closing costs ÷ loan term months (360 for 30-yr). Fannie/Freddie guidelines apply.' },
-  { title: 'RSU / Bonus / Commission Income', body: '2-year receipt history required. Use 24-month average. Commission >25% of base income requires a full 2-year average.' },
-  { title: 'Boarder Income (FHA / HomeReady)', body: 'Up to 30% of qualifying income with 12-month documented rental history. Written rental agreement required.' },
-  { title: 'Remove Co-Borrower (High Debt / Low Income)', body: 'If co-borrower adds more liability than qualifying income, removing them may improve DTI. Confirm primary qualifies solo first.' },
-  { title: 'Military BAH / BAS Allowances', body: 'BAH and BAS are non-taxable and can be grossed up 25% for qualifying income on VA and conventional loans.' },
-];
-
-const DTI_DEBT_STRATEGIES = [
-  { title: 'Pay Off Debt — <10 Months Remaining', body: 'Lender may exclude the payment from DTI if fewer than 10 payments remain at closing. Document with a payoff statement.' },
-  { title: 'Pay Down Revolving / Credit Card Balances', body: 'Lower balances reduce minimum monthly payments and can simultaneously improve the credit score and rate tier.' },
-  { title: 'Pay Off Small Balances at Closing', body: 'Borrower pays off the obligation at closing from verified funds. Account must close — a paid-down balance still counts in DTI.' },
-  { title: 'Exclude Co-Signed Debt', body: '12 consecutive months of cancelled checks or bank statements from the primary signer removes the obligation from borrower DTI.' },
-  { title: 'Exclude Business Debt', body: '12 months of business bank statements showing debt paid from the business account removes it from personal DTI.' },
-  { title: 'Student Loans — Use IBR Payment', body: 'If IBR >$0 use that amount. If $0: Conv/FHA use 1% of balance; VA use 5% ÷ 12; USDA use 1% of outstanding balance.' },
-  { title: 'Reduce Loan Amount / Increase Down Payment', body: 'Lower loan amount reduces P&I and the front ratio. Renegotiate price, bring more cash, or apply down payment assistance.' },
-  { title: 'Seller-Paid Rate Buydown', body: 'Seller credits fund a 2-1 or 3-2-1 buydown or permanent rate reduction — lowering P&I and the front ratio for life.' },
-  { title: 'Omit Authorized User Accounts', body: 'If borrower is an authorized user and never made payments, the debt may be excludable with a letter of explanation.' },
-];
-
-let dti_debts = [], dti_debtCounter = 0;
-const DTI_THRESHOLD = 10; // payments remaining to qualify for payment exclusion
-
 function dti_getLimits() {
-  const prog = document.getElementById('dti-program').value;
-  const uw   = document.getElementById('dti-uw').value;
-  const lim  = DTI_LIMITS[prog];
-  return {
-    front: uw === 'MANUAL' ? lim.frontManual : lim.frontAUS,
-    back:  uw === 'MANUAL' ? lim.backManual  : lim.backAUS,
-    label: lim.label,
-  };
+  const front = parseFloat(document.getElementById('dti-target-front').value) / 100 || null;
+  const back  = parseFloat(document.getElementById('dti-target-back').value)  / 100 || null;
+  return { front, back };
 }
 
 function dti_calc() {
@@ -2324,13 +2277,6 @@ function dti_calc() {
   const front  = parseFloat(document.getElementById('dti-front').value) / 100;
   const back   = parseFloat(document.getElementById('dti-back').value)  / 100;
   const lim    = dti_getLimits();
-  const uw     = document.getElementById('dti-uw').value;
-
-  // Threshold pills — always update
-  document.getElementById('dti-threshold-bar').style.display = 'flex';
-  document.getElementById('dti-front-pill').textContent = lim.front ? `Front limit: ${(lim.front*100).toFixed(0)}%` : 'Front: No limit';
-  document.getElementById('dti-back-pill').textContent  = `Back limit: ${(lim.back*100).toFixed(0)}%`;
-  document.getElementById('dti-manual-note').style.display = uw === 'MANUAL' ? '' : 'none';
 
   if (!income || !back) {
     document.getElementById('dti-results').classList.add('results-hidden');
@@ -2341,7 +2287,7 @@ function dti_calc() {
   // ── Status cards ───────────────────────────────────
   const renderCard = (prefix, ratio, limit) => {
     const pct    = (ratio * 100).toFixed(2) + '%';
-    const limTxt = limit ? (limit * 100).toFixed(0) + '%' : 'No limit';
+    const limTxt = limit ? (limit * 100).toFixed(1) + '%' : '—';
     const over   = limit ? ratio > limit : false;
 
     document.getElementById(`dti-${prefix}-val`).textContent   = pct;
@@ -2353,21 +2299,20 @@ function dti_calc() {
     card.classList.remove('dti-ratio-ok','dti-ratio-bad');
 
     if (!limit) {
-      statusEl.textContent = '✓  No limit for this program';
-      statusEl.style.color = 'var(--safe)';
+      statusEl.textContent = '— Enter a target ratio above';
+      statusEl.style.color = 'var(--muted)';
       gapEl.textContent    = '';
-      card.classList.add('dti-ratio-ok');
     } else if (over) {
       const overBy = ((ratio - limit) * 100).toFixed(2);
-      statusEl.textContent = `⚠  Over limit by ${overBy}%`;
+      statusEl.textContent = `⚠  Over target by ${overBy}%`;
       statusEl.style.color = 'var(--danger)';
-      gapEl.textContent    = `Must come down ${overBy}% to qualify — repair required`;
+      gapEl.textContent    = `Must come down ${overBy}% — repair required`;
       card.classList.add('dti-ratio-bad');
     } else {
       const cushion = ((limit - ratio) * 100).toFixed(2);
-      statusEl.textContent = `✓  Within limit — ${cushion}% of room remaining`;
+      statusEl.textContent = `✓  Within target — ${cushion}% of room remaining`;
       statusEl.style.color = 'var(--safe)';
-      gapEl.textContent    = `${cushion}% cushion before hitting the ${limTxt} ceiling`;
+      gapEl.textContent    = `${cushion}% cushion before hitting the ${limTxt} target`;
       card.classList.add('dti-ratio-ok');
     }
   };
@@ -2396,7 +2341,7 @@ function dti_calc() {
   const showMet = (id, val) => {
     const el = document.getElementById(id);
     if (!val || val <= 0) {
-      el.textContent = '✓  Already within limit';
+      el.textContent = '✓  Already within target';
       el.className   = 'col-metric-value highlight';
     } else {
       el.textContent = fmt$(val) + '/mo';
@@ -2424,6 +2369,32 @@ function dti_calc() {
 
   dti_renderDebtTable();
 }
+
+const DTI_INCOME_STRATEGIES = [
+  { title: 'Add a Co-Borrower', body: 'Co-borrower income adds to the qualifying total. Net their monthly debts against the income benefit first before adding.' },
+  { title: 'Non-Taxable Income Gross-Up', body: 'VA disability, SSI, child support — Conv/VA/USDA gross up 25%, FHA 15–25%. Multiply non-taxable monthly income by the applicable factor.' },
+  { title: 'Rental Income — 2–4 Unit Subject', body: '75% of market rent from non-owner-occupied units offsets PITI. Requires signed leases or appraisal Form 1007 / 1025.' },
+  { title: 'Asset Depletion (Conv / Non-QM)', body: 'Eligible assets minus down payment and closing costs ÷ loan term months (360 for 30-yr). Fannie/Freddie guidelines apply.' },
+  { title: 'RSU / Bonus / Commission Income', body: '2-year receipt history required. Use 24-month average. Commission >25% of base income requires a full 2-year average.' },
+  { title: 'Boarder Income (FHA / HomeReady)', body: 'Up to 30% of qualifying income with 12-month documented rental history. Written rental agreement required.' },
+  { title: 'Remove Co-Borrower (High Debt / Low Income)', body: 'If co-borrower adds more liability than qualifying income, removing them may improve DTI. Confirm primary qualifies solo first.' },
+  { title: 'Military BAH / BAS Allowances', body: 'BAH and BAS are non-taxable and can be grossed up 25% for qualifying income on VA and conventional loans.' },
+];
+
+const DTI_DEBT_STRATEGIES = [
+  { title: 'Pay Off Debt — <10 Months Remaining', body: 'Lender may exclude the payment from DTI if fewer than 10 payments remain at closing. Document with a payoff statement.' },
+  { title: 'Pay Down Revolving / Credit Card Balances', body: 'Lower balances reduce minimum monthly payments and can simultaneously improve the credit score and rate tier.' },
+  { title: 'Pay Off Small Balances at Closing', body: 'Borrower pays off the obligation at closing from verified funds. Account must close — a paid-down balance still counts in DTI.' },
+  { title: 'Exclude Co-Signed Debt', body: '12 consecutive months of cancelled checks or bank statements from the primary signer removes the obligation from borrower DTI.' },
+  { title: 'Exclude Business Debt', body: '12 months of business bank statements showing debt paid from the business account removes it from personal DTI.' },
+  { title: 'Student Loans — Use IBR Payment', body: 'If IBR >$0 use that amount. If $0: Conv/FHA use 1% of balance; VA use 5% ÷ 12; USDA use 1% of outstanding balance.' },
+  { title: 'Reduce Loan Amount / Increase Down Payment', body: 'Lower loan amount reduces P&I and the front ratio. Renegotiate price, bring more cash, or apply down payment assistance.' },
+  { title: 'Seller-Paid Rate Buydown', body: 'Seller credits fund a 2-1 or 3-2-1 buydown or permanent rate reduction — lowering P&I and the front ratio for life.' },
+  { title: 'Omit Authorized User Accounts', body: 'If borrower is an authorized user and never made payments, the debt may be excludable with a letter of explanation.' },
+];
+
+let dti_debts = [], dti_debtCounter = 0;
+const DTI_THRESHOLD = 10; // payments remaining to qualify for payment exclusion
 
 function dti_addDebt() {
   const name = document.getElementById('dti-debt-name').value.trim();
